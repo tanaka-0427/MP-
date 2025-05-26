@@ -1,0 +1,71 @@
+# docker-composeのバージョン指定
+version: '3.8'
+
+# コンテナ群の記述
+services:
+  # nginxというサービス
+  nginx:
+    # コンテナ名指定
+    container_name: curriculum-nginx
+    # 使用イメージの指定
+    image: nginx:latest
+    # 同期ファイルの指定
+    volumes:
+      - ./docker/nginx:/etc/nginx/conf.d
+      - ./app:/var/www/html
+    # 使用ポートの指定
+    ports:
+      - "80:80"
+    # 依存関係の指定 (指定したコンテナより後に立ち上がる)
+    depends_on:
+      - php
+
+  php:
+    container_name: curriculum-laravel
+    ###############################################################
+    # Mac M1チップユーザーは以下のコメントアウトを解除して作業を進めてください
+    # platform: linux/x86_64
+    ###############################################################
+    
+    # どれを使ってビルド(コンテナ立ち上げを行うか)
+    build:
+      # ディレクトリの指定
+      context: ./
+      # 使用するDockerfile名の指定
+      dockerfile: docker/php/Dockerfile
+    volumes:
+    - ./app:/var/www/html
+    - ./docker/php/check_startup.sh:/tmp/check_startup.sh
+    # サーバーに対してオープンするポートを指定
+    expose:
+      - "9000"
+    depends_on:
+      - db
+
+  db:
+    container_name: curriculum-db
+    image: mysql:5.7
+    # コンテナの環境変数を指定
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      TZ: 'Asia/Tokyo'
+    volumes:
+      - ./db:/var/lib/mysql
+    restart: always
+    ports:
+      - 3306:3306
+
+  phpMyAdmin:
+    image: phpmyadmin/phpmyadmin
+    environment:
+      - PMA_PARBIRARY=1
+      - PMA_HOST=db
+      - PMA_USER=root
+      - PMA_PASSWORD=root
+    # コンテナの関連を指定
+    links:
+      - db
+    ports:
+      - 4040:80
+    volumes:
+      - ./phpmyadmin/sessions:/sessions
