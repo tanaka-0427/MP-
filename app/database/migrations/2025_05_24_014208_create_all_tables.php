@@ -83,6 +83,12 @@ class CreateAllTables extends Migration
             $table->foreign('post_id')->references('id')->on('posts')->onDelete('cascade');
             $table->foreign('tag_id')->references('id')->on('tags')->onDelete('cascade');
         });
+        
+        Schema::create('password_resets', function (Blueprint $table) {
+            $table->string('email')->index();
+            $table->string('token');
+            $table->timestamp('created_at')->nullable();
+        });
     }
 
     public function down(): void
@@ -95,5 +101,6 @@ class CreateAllTables extends Migration
         Schema::dropIfExists('posts');
         Schema::dropIfExists('categories');
         Schema::dropIfExists('users');
+        Schema::dropIfExists('password_resets');
     }
 }

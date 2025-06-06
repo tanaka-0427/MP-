@@ -10,10 +10,15 @@ class CategoryController extends Controller
     // カテゴリ一覧表示
     public function index()
     {
-        $categories = Category::all();
+        $categories = Category::withCount('posts')->get();
         return view('categories.index', compact('categories'));
     }
-
+    public function show($id)
+    {
+        $category = Category::findOrFail($id);
+        $posts = $category->posts()->latest()->paginate(10);
+        return view('categories.show', compact('category', 'posts'));
+    }
     // カテゴリ作成フォーム
     public function create()
     {

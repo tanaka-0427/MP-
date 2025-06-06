@@ -1,6 +1,6 @@
 <?php
 
-namespace App;
+namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
@@ -16,4 +16,10 @@ class Category extends Model
     {
         return $this->hasMany(Post::class);
     }
+    public function index()
+{
+    $categories = Category::all();
+    return view('categories.index', compact('categories'));
+}
+
 }

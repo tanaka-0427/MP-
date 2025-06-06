@@ -7,6 +7,34 @@ use App\Models\Like;
 
 class LikeController extends Controller
 {
+    public function toggle(Request $request)
+    {
+        $userId = auth()->id();
+        $postId = $request->post_id;
+
+        $like = Like::where('user_id', $userId)
+                    ->where('post_id', $postId)
+                    ->first();
+
+        if ($like) {
+            $like->delete();
+            $liked = false;
+        } else {
+            Like::create([
+                'user_id' => $userId,
+                'post_id' => $postId,
+            ]);
+            $liked = true;
+        }
+
+        $likeCount = Like::where('post_id', $postId)->count();
+
+        return response()->json([
+            'liked' => $liked,
+            'count' => $likeCount
+        ]);
+    }
+
     public function store(Request $request, $postId)
     {
         Like::firstOrCreate([

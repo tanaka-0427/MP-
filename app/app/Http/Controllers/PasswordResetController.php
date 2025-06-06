@@ -26,13 +26,13 @@ class PasswordResetController extends Controller
             : back()->withErrors(['email' => __($status)]);
     }
 
-    // GET /password-reset/{token}/edit  パスワード変更フォーム
+    //  パスワード変更フォーム
     public function edit($token)
     {
         return view('auth.passwords.reset', ['token' => $token]);
     }
 
-    // PUT /password-reset/{token}  パスワード変更処理
+    // パスワード変更処理
     public function update(Request $request, $token)
     {
         $request->validate([

@@ -6,6 +6,14 @@ use Illuminate\Http\Request;
 
 class UserController extends Controller
 {
+    public function mypage()
+{
+    $user = auth()->user();
+    $myPosts = $user->posts()->latest()->get();
+
+    return view('users.mypage', compact('myPosts'));
+}
+
     /**
      * Display a listing of the resource.
      *
@@ -45,7 +53,10 @@ class UserController extends Controller
      */
     public function show($id)
     {
-        //
+        $user = User::findOrFail($id);
+    $posts = $user->posts()->latest()->get();
+
+    return view('users.show', compact('user', 'posts'));
     }
 
     /**

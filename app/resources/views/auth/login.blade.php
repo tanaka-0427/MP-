@@ -31,7 +31,7 @@
 
     <p>
     <a href="{{ route('register') }}">新規登録はこちら</a><br>
-    <a href="{{ route('password-reset.create') }}">パスワードを忘れた方はこちら</a>
+    <a href="{{ route('password.request') }}">パスワードを忘れた方はこちら</a>
     </p>
 </body>
 </html>

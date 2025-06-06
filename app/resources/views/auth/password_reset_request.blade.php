@@ -22,7 +22,7 @@
         </div>
     @endif
 
-    <form method="POST" action="{{ route('password-reset.store') }}">
+    <form method="POST" action="{{ route('password.email') }}">
         @csrf
         <label for="email">登録済みのメールアドレス：</label>
         <input type="email" id="email" name="email" value="{{ old('email') }}" required autofocus><br>

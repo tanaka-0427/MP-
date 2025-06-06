@@ -5,117 +5,182 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Post;
 use App\Models\Category;
+use Illuminate\Support\Facades\Storage;
 
 class PostController extends Controller
 {
-    // 一覧表示
-    public function index()
-    {
-        $posts = Post::with('user', 'category')->latest()->get();
-        return view('posts.index', compact('posts'));
-    }
-
-    // 投稿作成フォーム表示
+   public function index()
+{
+    $posts = Post::latest()->paginate(10);
+    return view('main.index', compact('posts'));
+}
+    // 投稿フォーム表示
     public function create()
     {
         $categories = Category::all();
-        return view('posts.create', compact('categories'));
+        return view('posts.create', [
+            'categories' => $categories,
+            'post' => new Post(),
+        ]);
     }
-
-    // 投稿の保存
+    //編集
+    public function edit(Post $post)
+    {
+        $categories = Category::all();
+        return view('posts.create', [
+        'categories' => $categories,
+        'post' => $post,
+    ]);
+}
+    // 投稿確認・戻る・保存処理
     public function store(Request $request)
     {
-        $request->validate([
+        $validated = $request->validate([
             'title' => 'required|string|max:150',
-            'content' => 'required|string',
-            'category_id' => 'required|exists:categories,id',
             'price_original' => 'required|integer',
             'price_purchased' => 'required|integer',
-            'image' => 'nullable|image|max:2048'
+            'price_current' => 'nullable|integer',
+            'category_id' => 'required|exists:categories,id',
+            'content' => 'required|string',
+            'image' => 'nullable|image|max:2048',
         ]);
 
-        $post = new Post();
-        $post->user_id = auth()->id();  // ログイン中のユーザーID
-        $post->category_id = $request->category_id;
-        $post->title = $request->title;
-        $post->content = $request->content;
-        $post->price_original = $request->price_original;
-        $post->price_purchased = $request->price_purchased;
+        // 確認画面
+        if ($request->input('action') === 'confirm') {
+            $imagePath = null;
+            if ($request->hasFile('image')) {
+                $imagePath = $request->file('image')->store('temp', 'public');
+                session(['temp_image_path' => $imagePath]);
+            }
 
-        if ($request->hasFile('image')) {
-            $post->image = $request->file('image')->store('images', 'public');
+            $categories = Category::all();
+            $categoryName = $categories->where('id', $validated['category_id'])->first()->name ?? '';
+
+            return view('posts.confirm', [
+                'data' => $validated,
+                'categoryName' => $categoryName,
+                'imagePath' => $imagePath,
+            ]);
         }
 
-        $post->save();
+        // 戻る処理
+        if ($request->input('action') === 'back') {
+            $categories = Category::all();
+            return view('posts.create', [
+                'post' => (object) $request->except('_token', 'action'),
+                'categories' => $categories,
+            ]);
+        }
 
-        return redirect()->route('posts.index')->with('success', '投稿が作成されました');
+        // 保存処理
+        if ($request->input('action') === 'submit') {
+            $post = new Post();
+            $post->user_id = auth()->id();
+            $post->title = $validated['title'];
+            $post->category_id = $validated['category_id'];
+            $post->content = $validated['content'];
+            $post->price_original = $validated['price_original'];
+            $post->price_purchased = $validated['price_purchased'];
+            $post->price_current = $validated['price_current'] ?? null;
+         
+
+            $tempImagePath = session('temp_image_path');
+            if ($tempImagePath) {
+                $finalPath = str_replace('temp/', 'images/', $tempImagePath);
+                Storage::disk('public')->move($tempImagePath, $finalPath);
+                $post->image = $finalPath;
+                session()->forget('temp_image_path');
+            }
+
+            $post->save();
+
+
+            return redirect()->route('posts.show', $post->id)
+                             ->with('success', '投稿が完了しました');
+        }
+
+        // それ以外は不正
+        abort(400, '不正な操作です');
     }
+    //検索
+    public function search(Request $request)
+{
+    $query = $request->input('q'); 
 
-    // 投稿詳細表示
+    $posts = Post::where('title', 'like', "%{$query}%")
+                 ->orWhere('content', 'like', "%{$query}%")
+                 ->with('user', 'category')
+                 ->latest()
+                 ->paginate(10);
+
+    return view('posts.search', compact('posts', 'query'));
+}
+    //詳細
     public function show($id)
     {
-        $post = Post::with('user', 'category')->findOrFail($id);
-        return view('posts.show', compact('post'));
+    $post = Post::findOrFail($id);
+    return view('posts.show', compact('post'));
+    }
+// 投稿の更新処理
+public function update(Request $request, $id)
+{
+    $validated = $request->validate([
+        'title' => 'required|string|max:150',
+        'price_original' => 'required|integer',
+        'price_purchased' => 'required|integer',
+        'price_current' => 'nullable|integer',
+        'category_id' => 'required|exists:categories,id',
+        'content' => 'required|string',
+        'image' => 'nullable|image|max:2048',
+    ]);
+
+    $post = Post::findOrFail($id);
+
+    // 自分の投稿か確認
+    if ($post->user_id !== auth()->id()) {
+        abort(403, '権限がありません。');
     }
 
-    // 投稿編集フォーム
-    public function edit($id)
-    {
-        $post = Post::findOrFail($id);
+    $post->title = $validated['title'];
+    $post->category_id = $validated['category_id'];
+    $post->content = $validated['content'];
+    $post->price_original = $validated['price_original'];
+    $post->price_purchased = $validated['price_purchased'];
+    $post->price_current = $validated['price_current'] ?? null;
 
-        if ($post->user_id !== auth()->id()) {
-            abort(403, 'Unauthorized');
+    if ($request->hasFile('image')) {
+        if ($post->image) {
+            Storage::disk('public')->delete($post->image);
         }
 
-        $categories = Category::all();
-
-        return view('posts.edit', compact('post', 'categories'));
+        $post->image = $request->file('image')->store('images', 'public');
     }
 
-    // 投稿更新処理
-    public function update(Request $request, $id)
-    {
-        $post = Post::findOrFail($id);
+    $post->save();
 
-        if ($post->user_id !== auth()->id()) {
-            abort(403, 'Unauthorized');
-        }
-
-        $request->validate([
-            'title' => 'required|string|max:150',
-            'content' => 'required|string',
-            'category_id' => 'required|exists:categories,id',
-            'price_original' => 'required|integer',
-            'price_purchased' => 'required|integer',
-            'image' => 'nullable|image|max:2048'
-        ]);
-
-        $post->category_id = $request->category_id;
-        $post->title = $request->title;
-        $post->content = $request->content;
-        $post->price_original = $request->price_original;
-        $post->price_purchased = $request->price_purchased;
-
-        if ($request->hasFile('image')) {
-            $post->image = $request->file('image')->store('images', 'public');
-        }
-
-        $post->save();
-
-        return redirect()->route('posts.show', $post->id)->with('success', '投稿を更新しました');
-    }
-
-    // 投稿削除
-    public function destroy($id)
-    {
-        $post = Post::findOrFail($id);
-
-        if ($post->user_id !== auth()->id()) {
-            abort(403, 'Unauthorized');
-        }
-
-        $post->delete();
-
-        return redirect()->route('posts.index')->with('success', '投稿を削除しました');
-    }
+    return redirect()->route('posts.show', $post->id)
+                     ->with('success', '投稿を更新しました。');
 }
+// 投稿の削除処理
+public function destroy($id)
+{
+    $post = Post::findOrFail($id);
+
+    // 自分の投稿か確認
+    if ($post->user_id !== auth()->id()) {
+        abort(403, '権限がありません。');
+    }
+
+    // 画像削除
+    if ($post->image) {
+        Storage::disk('public')->delete($post->image);
+    }
+
+    // 投稿を削除
+    $post->delete();
+
+    return redirect()->route('main')->with('success', '投稿が削除されました。');
+}
+
+}
+

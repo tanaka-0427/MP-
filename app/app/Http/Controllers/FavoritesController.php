@@ -6,7 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Favorite;
 use App\Models\Post;
 
-class FavoriteController extends Controller
+class FavoritesController extends Controller
 {
     public function store(Request $request, $postId)
     {
