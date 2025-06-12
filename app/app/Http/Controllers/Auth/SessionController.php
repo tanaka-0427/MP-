@@ -22,12 +22,18 @@ class SessionController extends Controller
         ]);
 
         if (Auth::attempt($credentials)) {
-            $request->session()->regenerate();
-            return redirect()->intended('main');
+        $request->session()->regenerate();
+        $user = Auth::user();
+
+        if ($user->is_admin) {
+            return redirect()->route('admin.users.index'); 
         }
 
-        return back()->withErrors(['email' => '認証に失敗しました']);
+        return redirect()->route('main');
     }
+
+    return back()->withErrors(['email' => '認証に失敗しました']);
+}
 
     //  ログアウト処理
     public function destroy(Request $request, $id = null)

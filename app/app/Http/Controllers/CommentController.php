@@ -8,31 +8,56 @@ use App\Models\Post;
 
 class CommentController extends Controller
 {
-    public function store(Request $request, $postId)
-    {
-        $request->validate([
-            'comment' => 'required|string|max:1000',
-        ]);
+    public function store(Request $request)
+{
+    $request->validate([
+        'comment' => 'required|string|max:1000',
+    ]);
 
-        Comment::create([
-            'user_id' => auth()->id(),
-            'post_id' => $postId,
-            'comment' => $request->comment,
-        ]);
+    $comment = Comment::create([
+        'user_id' => auth()->id(),
+        'post_id' => $request->post_id,
+        'comment' => $request->comment,
+    ]);
 
-        return back()->with('success', 'コメントを投稿しました');
-    }
+     return response()->json([
+        'id' => $comment->id, 
+        'user' => $comment->user->name,
+        'comment' => $comment->comment,
+    ]);
+}
 
     public function destroy($id)
     {
         $comment = Comment::findOrFail($id);
 
         if ($comment->user_id !== auth()->id()) {
-            abort(403);
+             return response()->json(['error' => 'Unauthorized'], 403);
         }
 
         $comment->delete();
 
-        return back()->with('success', 'コメントを削除しました');
+        return response()->json(['success' => true]);
     }
+    public function update(Request $request, $id)
+{
+    $comment = Comment::findOrFail($id);
+
+    if ($comment->user_id !== auth()->id()) {
+        return response()->json(['error' => 'Unauthorized'], 403);
+    }
+
+    $request->validate([
+        'comment' => 'required|string|max:1000',
+    ]);
+
+    $comment->comment = $request->comment;
+    $comment->save();
+
+    return response()->json([
+        'success' => true,
+        'comment' => $comment->comment
+    ]);
+}
+
 }

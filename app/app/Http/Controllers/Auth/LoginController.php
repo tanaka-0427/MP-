@@ -28,6 +28,14 @@ class LoginController extends Controller
             'login' => 'メールアドレスまたはパスワードが正しくありません。',
         ])->withInput();
     }
+    protected function authenticated(Request $request, $user)
+{
+    if ($user->is_admin) {
+        return redirect()->route('admin.dashboard');
+    }
+
+    return redirect()->route('main');
+}
 
     // ログアウト
     public function destroy(Request $request)

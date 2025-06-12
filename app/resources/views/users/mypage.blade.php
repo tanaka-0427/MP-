@@ -9,7 +9,7 @@
         <div class="card-body">
             <h5 class="card-title">{{ Auth::user()->name }} さん</h5>
             <p class="card-text">{{ Auth::user()->profile ?? 'プロフィール未設定' }}</p>
-            <a href="{{ route('users.edit', Auth::id()) }}" class="btn btn-outline-primary">プロフィール編集</a>
+            <a href="{{ route('users.edit', auth()->user()->id) }}" class="btn btn-primary">編集する</a>
         </div>
     </div>
 

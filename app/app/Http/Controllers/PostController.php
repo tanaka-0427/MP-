@@ -117,10 +117,10 @@ class PostController extends Controller
 }
     //詳細
     public function show($id)
-    {
-    $post = Post::findOrFail($id);
+{
+    $post = Post::with(['likes', 'comments.user', 'user', 'category'])->findOrFail($id);
     return view('posts.show', compact('post'));
-    }
+}
 // 投稿の更新処理
 public function update(Request $request, $id)
 {

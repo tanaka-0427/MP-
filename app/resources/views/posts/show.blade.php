@@ -16,18 +16,20 @@
                 <a href="{{ route('users.show', $post->user->id) }}" class="ms-2">{{ $post->user->name }}</a>
             </div>
             <p>{{ $post->content }}</p>
-            
-            <!-- いいね -->
-            <button id="like-btn" class="btn btn-outline-danger" data-post-id="{{ $post->id }}">
-                ❤️ いいね <span id="like-count">{{ $post->likes->count() }}</span>
-            </button>
 
-            <!-- お気に入り -->
-            <form action="{{ route('favorites.store') }}" method="POST" class="d-inline">
-                @csrf
-                <input type="hidden" name="post_id" value="{{ $post->id }}">
-                <button type="submit" class="btn btn-outline-warning">⭐ お気に入り</button>
-            </form>
+            @auth
+                <!-- いいね -->
+                <button id="like-btn" class="btn btn-outline-danger" data-post-id="{{ $post->id }}">
+                    ❤️ いいね <span id="like-count">{{ $post->likes->count() }}</span>
+                </button>
+
+                <!-- お気に入り -->
+                <form action="{{ route('favorites.store', $post->id) }}" method="POST" class="d-inline">
+                    @csrf
+                    <input type="hidden" name="post_id" value="{{ $post->id }}">
+                    <button type="submit" class="btn btn-outline-warning">⭐ お気に入り</button>
+                </form>
+            @endauth
         </div>
     </div>
 
@@ -36,18 +38,32 @@
         <h4>コメント</h4>
         <div id="comment-list">
             @foreach($post->comments as $comment)
-                <div class="border p-2 mb-2">
-                    <strong>{{ $comment->user->name }}:</strong> {{ $comment->comment }}
+                <div class="border p-2 mb-2" data-comment-id="{{ $comment->id }}">
+                    <strong>{{ $comment->user->name }}:</strong>
+                    <span class="comment-text">{{ $comment->comment }}</span>
+
+                    @if ($comment->user_id === auth()->id())
+                        <div class="mt-1">
+                            <button class="btn btn-sm btn-secondary edit-comment-btn">編集</button>
+                            <button class="btn btn-sm btn-danger delete-comment-btn">削除</button>
+                        </div>
+                    @endif
                 </div>
             @endforeach
         </div>
 
-        <form id="comment-form">
-            @csrf
-            <input type="hidden" name="post_id" value="{{ $post->id }}">
-            <textarea name="comment" class="form-control mb-2" rows="2" placeholder="コメントを入力"></textarea>
-            <button type="submit" class="btn btn-primary">投稿</button>
-        </form>
+        @auth
+            <form id="comment-form">
+                @csrf
+                <input type="hidden" name="post_id" value="{{ $post->id }}">
+                <textarea name="comment" class="form-control mb-2" rows="2" placeholder="コメントを入力" required></textarea>
+                <button type="submit" class="btn btn-primary">投稿</button>
+            </form>
+        @endauth
+
+        @guest
+            <p>ログインしてコメントやいいねをしましょう。</p>
+        @endguest
     </div>
 
     <!-- 相場情報 -->
@@ -69,24 +85,31 @@
 
 @section('scripts')
 <script>
-document.getElementById('like-btn').addEventListener('click', function () {
+document.getElementById('like-btn')?.addEventListener('click', function () {
     const postId = this.dataset.postId;
-    fetch(`/likes/${postId}`, {
+
+    // 修正: FormDataの作成方法を変更
+    const formData = new FormData();
+    formData.append('post_id', postId);
+
+    fetch('/likes/toggle', {
         method: 'POST',
         headers: {
-            'X-CSRF-TOKEN': '{{ csrf_token() }}',
-            'Content-Type': 'application/json'
-        }
+            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+        },
+        body: formData
     })
     .then(res => res.json())
     .then(data => {
-        document.getElementById('like-count').textContent = data.likes_count;
+        document.getElementById('like-count').textContent = data.count;
     });
 });
 
-document.getElementById('comment-form').addEventListener('submit', function (e) {
+// コメント投稿
+document.getElementById('comment-form')?.addEventListener('submit', function (e) {
     e.preventDefault();
     const formData = new FormData(this);
+
     fetch('/comments', {
         method: 'POST',
         headers: {
@@ -97,9 +120,99 @@ document.getElementById('comment-form').addEventListener('submit', function (e) 
     .then(res => res.json())
     .then(data => {
         const commentList = document.getElementById('comment-list');
-        commentList.innerHTML += `<div class="border p-2 mb-2"><strong>${data.user}:</strong> ${data.comment}</div>`;
+        commentList.innerHTML += `
+            <div class="border p-2 mb-2" data-comment-id="${data.id}">
+                <strong>${data.user}:</strong>
+                <span class="comment-text">${data.comment}</span>
+                <div class="mt-1">
+                    <button class="btn btn-sm btn-secondary edit-comment-btn">編集</button>
+                    <button class="btn btn-sm btn-danger delete-comment-btn">削除</button>
+                </div>
+            </div>
+        `;
         this.reset();
     });
+});
+
+// 編集・削除処理
+document.addEventListener('click', function(e) {
+    // 削除
+    if (e.target.classList.contains('delete-comment-btn')) {
+        const commentDiv = e.target.closest('[data-comment-id]');
+        const commentId = commentDiv?.dataset?.commentId;
+
+        if (confirm('本当に削除しますか？')) {
+            fetch(`/comments/${commentId}`, {
+                method: 'DELETE',
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Accept': 'application/json'
+                }
+            })
+            .then(res => {
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                return res.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    commentDiv.remove();
+                } else {
+                    alert('削除に失敗しました。');
+                }
+            })
+            .catch(err => {
+                console.error('エラー:', err);
+                alert('通信エラーが発生しました');
+            });
+        }
+    }
+
+    // 編集モード
+    if (e.target.classList.contains('edit-comment-btn')) {
+        const commentDiv = e.target.closest('[data-comment-id]');
+        const commentText = commentDiv.querySelector('.comment-text');
+        const oldComment = commentText.textContent;
+
+        commentText.innerHTML = `
+            <textarea class="form-control mb-2 edit-area">${oldComment}</textarea>
+            <button class="btn btn-sm btn-primary save-comment-btn">保存</button>
+        `;
+        e.target.style.display = 'none';
+    }
+
+    // 編集保存
+    if (e.target.classList.contains('save-comment-btn')) {
+        const commentDiv = e.target.closest('[data-comment-id]');
+        const commentId = commentDiv.dataset.commentId;
+        const newComment = commentDiv.querySelector('.edit-area').value;
+
+        fetch(`/comments/${commentId}`, {
+            method: 'PUT',
+            headers: {
+                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({ comment: newComment })
+        })
+        .then(res => {
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            return res.json();
+        })
+        .then(data => {
+            if (data.success) {
+                const commentText = commentDiv.querySelector('.comment-text');
+                commentText.textContent = data.comment;
+                commentDiv.querySelector('.edit-comment-btn').style.display = 'inline-block';
+            } else {
+                alert('保存に失敗しました。');
+            }
+        })
+        .catch(err => {
+            console.error('エラー:', err);
+            alert('通信エラーが発生しました');
+        });
+    }
 });
 </script>
 @endsection

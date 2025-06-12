@@ -3,7 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-
+use App\Models\PriceHistory;
 class Post extends Model
 {
     protected $fillable = [
@@ -40,4 +40,9 @@ class Post extends Model
     {
         return $this->belongsToMany(Tag::class, 'post_tags');
     }
+    public function priceHistories()
+    {
+        return $this->hasMany(PriceHistory::class);
+    }
 }
+

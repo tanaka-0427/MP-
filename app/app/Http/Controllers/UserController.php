@@ -1,7 +1,8 @@
 <?php
 
 namespace App\Http\Controllers;
-
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Http\Request;
 
 class UserController extends Controller
@@ -13,83 +14,51 @@ class UserController extends Controller
 
     return view('users.mypage', compact('myPosts'));
 }
+    public function profile()
+{
+    $user = auth()->user();
+    return view('users.profile', compact('user'));
+}
+public function edit($id)
+{
+    $user = auth()->user();
 
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function index()
-    {
-        //
+    if ($user->id != $id) {
+        abort(403); 
     }
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
+    return view('users.edit', compact('user'));
+}
+
+public function update(Request $request, $id)
+{
+    $user = auth()->user();
+
+    if ($user->id != $id) {
+        abort(403);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(Request $request)
-    {
-        //
+    $request->validate([
+        'name' => 'required|string|max:255',
+        'profile' => 'nullable|string|max:1000',
+        'icon' => 'nullable|image|max:2048',
+    ]);
+
+    $user->name = $request->name;
+    $user->profile = $request->profile;
+
+    if ($request->hasFile('icon')) {
+        if ($user->icon) {
+            Storage::delete('public/' . $user->icon);
+        }
+        $path = $request->file('icon')->store('icons', 'public');
+        $user->icon = $path;
     }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function show($id)
-    {
-        $user = User::findOrFail($id);
-    $posts = $user->posts()->latest()->get();
+    $user->save();
 
-    return view('users.show', compact('user', 'posts'));
-    }
+    return redirect()->route('profile')->with('success', 'プロフィールを更新しました');
+}
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function edit($id)
-    {
-        //
-    }
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy($id)
-    {
-        //
-    }
 }
