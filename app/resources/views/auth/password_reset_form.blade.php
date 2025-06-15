@@ -1,7 +1,7 @@
-<!-- resources/views/auth/password_reset_form.blade.php -->
 <!DOCTYPE html>
 <html lang="ja">
 <head>
+    <link href="{{ asset('css/auth.css') }}" rel="stylesheet">
     <meta charset="UTF-8" />
     <title>パスワード再設定 - MP@</title>
 </head>

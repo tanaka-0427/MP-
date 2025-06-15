@@ -23,7 +23,7 @@
 
             <p>
                 <strong>投稿者:</strong>
-                <a href="{{ route('admin.users.show', $post->user->id) }}" class="btn btn-sm btn-outline-secondary">
+                <a href="route('users.show', $post->user)" class="btn btn-sm btn-outline-secondary">
                     {{ $post->user->name }}
                 </a>
             </p>

@@ -22,6 +22,7 @@
             <div class="card mb-3">
                 <div class="card-body">
                     <h5 class="card-title">{{ $post->title }}</h5>
+                     <img src="{{ asset('storage/' . $post->image) }}" class="img-fluid" alt="商品画像">
                     <p class="card-text">{{ Str::limit($post->content, 100) }}</p>
                     <a href="{{ route('posts.show', $post->id) }}" class="btn btn-primary">詳細</a>
                     <a href="{{ route('posts.edit', $post->id) }}" class="btn btn-secondary">投稿編集</a>
@@ -35,7 +36,17 @@
             </div>
         @endforeach
     @endif
-
+    <h2>おすすめの商品</h2>
+    <div class="recommend-list">
+    @foreach ($recommendedPosts as $post)
+        <div class="post-card">
+            <a href="{{ route('posts.show', $post) }}">
+                 <img src="{{ asset('storage/' . $post->image) }}" class="img-fluid" alt="商品画像">
+                <p>{{ $post->title }}</p>
+            </a>
+        </div>
+    @endforeach
+    </div>
     {{-- お気に入り一覧リンク --}}
     <div class="mt-4">
         <a href="{{ route('favorites.index') }}" class="btn btn-outline-success">お気に入り一覧を見る</a>

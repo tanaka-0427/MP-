@@ -15,6 +15,7 @@ use App\Http\Controllers\Admin\AdminUserController;
 use App\Http\Controllers\Admin\AdminPostController;
 use App\Http\Controllers\Admin\AdminCategoryController;
 use App\Http\Controllers\Admin\AdminDashboardController;
+use App\Http\Controllers\Admin\AdminAuthController;
 // --- 認証不要ページ（ログイン前） ---
 
 // ログインページ（トップ）
@@ -46,7 +47,8 @@ Route::middleware(['auth'])->group(function () {
     
     // 投稿検索
     Route::get('/posts/search', [PostController::class, 'search'])->name('posts.search');
-
+    //相場
+    Route::get('/scraping/{keyword}', [App\Http\Controllers\ScrapingController::class, 'show']);
     // カテゴリ一覧
     Route::get('/categories', [CategoryController::class, 'index'])->name('categories.index');
     Route::get('/categories/{id}', [CategoryController::class, 'show'])->name('categories.show');
@@ -61,6 +63,7 @@ Route::middleware(['auth'])->group(function () {
     Route::put('/users/{id}', [UserController::class, 'update'])->name('users.update');
     //ユーザー詳細
    Route::get('/users/{id}', [UserController::class, 'show'])->name('users.show');
+   
     // お気に入り一覧
     Route::get('/favorites', [FavoritesController::class, 'index'])->name('favorites.index');
     Route::post('/favorites/{post}', [FavoritesController::class, 'store'])->name('favorites.store');
@@ -104,6 +107,7 @@ Route::middleware(['auth'])->group(function () {
 
     // 新規カテゴリ追加
     Route::post('categories', [AdminCategoryController::class, 'store'])->name('categories.store');
+    
 });
 
-  
+  Route::post('/admin/logout', [AdminAuthController::class, 'logout'])->name('admin.logout');

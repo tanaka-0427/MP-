@@ -24,7 +24,7 @@
                             <div class="card-body">
                                 <h5 class="card-title">{{ $post->title }}</h5>
                                 <p class="card-text">{{ Str::limit($post->content, 60) }}</p>
-                                <a href="{{ route('posts.detail', $post->id) }}" class="btn btn-sm btn-outline-primary">詳細を見る</a>
+                                <a href="{{ route('posts.show', $post->id) }}" class="btn btn-sm btn-outline-primary">詳細を見る</a>
                             </div>
                         </div>
                     </div>

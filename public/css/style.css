@@ -1,0 +1,319 @@
+
+/*プロフィール編集フォーム関連*/
+.profile-edit-container {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.profile-edit-title {
+    font-size: 24px;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.profile-form .form-group {
+    margin-bottom: 20px;
+}
+
+.profile-form label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 8px;
+}
+
+.profile-form input[type="text"],
+.profile-form textarea,
+.profile-form input[type="file"] {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.profile-icon-preview {
+    display: block;
+    margin-bottom: 10px;
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+    border-radius: 50%;
+    border: 1px solid #ccc;
+}
+
+.form-actions {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+}
+
+.btn-primary,
+.btn-secondary {
+    padding: 10px 20px;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    border-radius: 4px;
+    font-weight: bold;
+}
+
+.btn-primary {
+    background-color: #007bff;
+    color: white;
+}
+
+.btn-secondary {
+    background-color: #6c757d;
+    color: white;
+}
+
+@media (max-width: 600px) {
+    .form-actions {
+        flex-direction: column;
+        gap: 10px;
+    }
+}
+
+/* マイページ全体・投稿カード関連*/
+.container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.card {
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.card-title {
+    font-size: 1.3rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.card-text {
+    font-size: 1rem;
+    color: #555;
+    margin-bottom: 1rem;
+}
+
+.card-body > a,
+.card-body > form button {
+    margin-right: 0.5rem;
+    margin-bottom: 0.3rem;
+}
+
+.btn-danger {
+    min-width: 80px;
+}
+
+.recommend-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 15px;
+}
+
+.post-card {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    overflow: hidden;
+    text-align: center;
+    background: white;
+    transition: box-shadow 0.3s ease;
+}
+
+.post-card:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.post-card img {
+    width: 100%;
+    height: 120px;
+    object-fit: cover;
+    display: block;
+}
+
+.post-card p {
+    padding: 0.5rem;
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: #333;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+
+@media (max-width: 600px) {
+    .container {
+        padding: 10px;
+    }
+
+    .card-body > a,
+    .card-body > form button {
+        display: block;
+        width: 100%;
+        margin-bottom: 10px;
+    }
+
+    .recommend-list {
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+        gap: 10px;
+    }
+
+    .post-card img {
+        height: 100px;
+    }
+}
+
+/* プロフィールページ関連*/
+.container {
+    max-width: 700px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.card {
+    border-radius: 10px;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.12);
+}
+
+.card-body .text-center img {
+    object-fit: cover;
+    border: 2px solid #ddd;
+}
+
+.card-body p {
+    font-size: 1.1rem;
+    color: #444;
+    margin-bottom: 1rem;
+    word-wrap: break-word;
+}
+
+.card-body strong {
+    color: #222;
+}
+
+.mt-4 a.btn {
+    margin-right: 10px;
+    margin-bottom: 10px;
+    min-width: 120px;
+}
+
+@media (max-width: 600px) {
+    .container {
+        padding: 10px;
+    }
+    .mt-4 a.btn {
+        display: block;
+        width: 100%;
+        margin-right: 0;
+    }
+}
+
+/*  他ユーザープロフィールページ関連*/
+.container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+h2, h5 {
+    color: #333;
+}
+
+.mb-4 > p {
+    font-size: 1.1rem;
+    color: #555;
+    line-height: 1.5;
+}
+
+.card.h-100 {
+    display: flex;
+    flex-direction: column;
+}
+
+.card-img-top {
+    object-fit: cover;
+    height: 180px;
+    width: 100%;
+    border-radius: 6px 6px 0 0;
+}
+
+.card-body {
+    flex-grow: 1;
+}
+
+.card-title {
+    font-weight: 700;
+    font-size: 1.2rem;
+    margin-bottom: 8px;
+}
+
+.card-text {
+    flex-grow: 1;
+    color: #444;
+}
+
+
+.row.g-4 {
+    gap: 1.5rem;
+}
+
+@media (max-width: 600px) {
+    .container {
+        padding: 10px;
+    }
+    .card-img-top {
+        height: 140px;
+    }
+}
+
+/* テーブル（プロフィール編集など詳細表示用）*/
+.container {
+    max-width: 700px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+h2 {
+    margin-bottom: 30px;
+    color: #333;
+    text-align: center;
+    font-weight: 700;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 30px;
+}
+
+.table th,
+.table td {
+    padding: 12px 15px;
+    border: 1px solid #ddd;
+    vertical-align: top;
+}
+
+.table th {
+    background-color: #f7f7f7;
+    width: 30%;
+    font-weight: 600;
+    color: #555;
+}
+
+.table td {
+    color: #444;
+}
+
+.table img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 6px;
+    display: block;
+
+}
+
+

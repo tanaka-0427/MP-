@@ -1,0 +1,137 @@
+
+/* 全体のベース設定*/
+body {
+  font-family: "Segoe UI", sans-serif;
+  background-color: #f8f9fa;
+  margin: 0;
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+/* フォームラッパー共通 */
+form {
+  background-color: #ffffff;
+  padding: 2rem;
+  border-radius: 0.75rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  max-width: 500px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* 見出し*/
+h1 {
+  text-align: center;
+  margin-bottom: 1.5rem;
+  color: #333;
+}
+
+/* ラベル */
+label {
+  display: block;
+  margin-bottom: 0.4rem;
+  font-weight: 600;
+  color: #555;
+}
+
+/* 入力フィールド共通 */
+input[type="text"],
+input[type="email"],
+input[type="password"] {
+  width: 100%;
+  padding: 0.75rem;
+  margin-bottom: 1.2rem;
+  border: 1px solid #ccc;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  box-sizing: border-box;
+}
+
+/* エラーメッセージ表示 */
+div[style*="color:red"] {
+  background-color: #ffe5e5;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  color: #cc0000;
+  margin-bottom: 1rem;
+  font-weight: bold;
+}
+
+div[style*="color:red"] ul {
+  background-color: #ffe5e5;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  list-style: none;
+  color: #cc0000;
+  margin-bottom: 1rem;
+}
+
+/* 成功メッセージ表示 */
+div[style*="color:green"] {
+  background-color: #e6ffed;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  color: #006400;
+  margin-bottom: 1rem;
+  font-weight: bold;
+}
+
+/* ボタン（共通） */
+button[type="submit"] {
+  padding: 0.75rem 1.2rem;
+  font-size: 1rem;
+  border: none;
+  border-radius: 0.5rem;
+  width: 100%;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+/* ログイン・通常フォーム用ボタン色 */
+button[type="submit"].btn-primary,
+button[type="submit"]:not(.btn-success) {
+  background-color: #007bff;
+  color: white;
+}
+
+button[type="submit"].btn-primary:hover,
+button[type="submit"]:not(.btn-success):hover {
+  background-color: #0056b3;
+}
+
+/* サインアップなど成功系ボタン色 */
+button[type="submit"].btn-success {
+  background-color: #28a745;
+  color: white;
+}
+
+button[type="submit"].btn-success:hover {
+  background-color: #218838;
+}
+
+/* リンク（補助リンク・ログインリンク共通） */
+p a {
+  display: block;
+  text-align: center;
+  margin-top: 1rem;
+  color: #007bff;
+  text-decoration: none;
+  font-size: 0.95rem;
+}
+
+p a:hover {
+  text-decoration: underline;
+}
+
+/* メディアクエリ（スマホ対応） */
+@media (max-width: 576px) {
+  form {
+    padding: 1.5rem;
+  }
+
+  h1 {
+    font-size: 1.5rem;
+  }
+}

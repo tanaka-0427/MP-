@@ -1,11 +1,11 @@
-<!-- resources/views/auth/login.blade.php -->
 <!DOCTYPE html>
 <html lang="ja">
 <head>
+    <link rel="stylesheet" href="{{ asset('css/auth.css') }}">
     <meta charset="UTF-8" />
     <title>ログイン - MP@</title>
 </head>
-<body>
+<body class="login-page">
     <h1>ログイン</h1>
 
     @if ($errors->any())

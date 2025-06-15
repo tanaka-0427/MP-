@@ -1,7 +1,7 @@
-<!-- resources/views/auth/register.blade.php -->
 <!DOCTYPE html>
 <html lang="ja">
 <head>
+    <link href="{{ asset('css/auth.css') }}" rel="stylesheet">
     <meta charset="UTF-8" />
     <title>新規登録 - MP@</title>
 </head>

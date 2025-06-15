@@ -29,10 +29,6 @@
             <th>現在の相場</th>
             <td>@if($data['price_current']) ￥{{ number_format($data['price_current']) }} @else 未入力 @endif</td>
         </tr>
-        <tr>
-            <th>Twitter連携</th>
-            <td>{{ isset($data['tweet']) && $data['tweet'] ? '連携する' : 'しない' }}</td>
-        </tr>
         @if(isset($imageUrl))
         <tr>
             <th>画像</th>

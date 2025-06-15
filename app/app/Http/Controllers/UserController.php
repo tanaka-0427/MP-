@@ -4,15 +4,27 @@ namespace App\Http\Controllers;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Http\Request;
+use App\Models\User;
+use App\Models\Post;
 
 class UserController extends Controller
 {
+     public function show($id)
+    {
+        $user = User::findOrFail($id);
+
+        $posts = Post::where('user_id', $id)->get();
+
+        return view('users.show', compact('user', 'posts'));
+    }
+
     public function mypage()
 {
     $user = auth()->user();
     $myPosts = $user->posts()->latest()->get();
+    $recommendedPosts = $user->recommendedPosts();
 
-    return view('users.mypage', compact('myPosts'));
+    return view('users.mypage', compact('myPosts', 'recommendedPosts'));
 }
     public function profile()
 {

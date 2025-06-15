@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>管理者ページ</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ asset('css/admin.css') }}">
 </head>
 <body>
     <!-- ヘッダー -->
@@ -17,7 +18,7 @@
                         <span class="nav-link text-white">ようこそ、{{ Auth::user()->name }}さん</span>
                     </li>
                     <li class="nav-item">
-                        <form action="{{ route('logout') }}" method="POST" class="d-inline">
+                        <form action="{{ route('admin.logout') }}" method="POST" class="d-inline">
                             @csrf
                             <button type="submit" class="btn btn-link nav-link">ログアウト</button>
                         </form>

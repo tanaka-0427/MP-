@@ -26,7 +26,7 @@ class SessionController extends Controller
         $user = Auth::user();
 
         if ($user->is_admin) {
-            return redirect()->route('admin.users.index'); 
+            return redirect()->route('admin.dashboard'); 
         }
 
         return redirect()->route('main');

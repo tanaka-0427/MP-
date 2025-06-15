@@ -1,6 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
+
 <div class="container">
     <div class="row mb-4">
         <div class="col-md-6">
@@ -12,7 +13,7 @@
             <p><strong>購入価格:</strong> ¥{{ number_format($post->price_purchased) }}</p>
             <p><strong>カテゴリ:</strong> {{ $post->category->name }}</p>
             <div class="d-flex align-items-center mb-3">
-                <img src="{{ asset('storage/' . $post->user->profile_image) }}" alt="投稿者" class="rounded-circle" width="50">
+                <img src="{{ asset('storage/' . $post->user->icon) }}" alt="投稿者" class="rounded-circle" width="50">
                 <a href="{{ route('users.show', $post->user->id) }}" class="ms-2">{{ $post->user->name }}</a>
             </div>
             <p>{{ $post->content }}</p>
@@ -68,27 +69,23 @@
 
     <!-- 相場情報 -->
     <div class="mb-4">
-        <h4>相場情報</h4>
-        <div class="row">
-            <div class="col-md-6">
-                <h6>メルカリ</h6>
-                <iframe src="https://www.mercari.com/jp/search/?keyword={{ urlencode($post->title) }}" width="100%" height="300"></iframe>
-            </div>
-            <div class="col-md-6">
-                <h6>ヤフオク</h6>
-                <iframe src="https://auctions.yahoo.co.jp/search/search?p={{ urlencode($post->title) }}" width="100%" height="300"></iframe>
-            </div>
-        </div>
+    <h4>相場情報</h4>
+    <div class="mb-4">
+    <h4>ヤフオク価格推移</h4>
+    <canvas id="priceChart" width="400" height="200"></canvas>
     </div>
+    </div>
+</div>
 </div>
 @endsection
 
 @section('scripts')
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
 document.getElementById('like-btn')?.addEventListener('click', function () {
-    const postId = this.dataset.postId;
+    const btn = this;
+    const postId = btn.dataset.postId;
 
-    // 修正: FormDataの作成方法を変更
     const formData = new FormData();
     formData.append('post_id', postId);
 
@@ -102,6 +99,14 @@ document.getElementById('like-btn')?.addEventListener('click', function () {
     .then(res => res.json())
     .then(data => {
         document.getElementById('like-count').textContent = data.count;
+
+        if(data.liked) {
+            btn.classList.remove('btn-outline-danger');
+            btn.classList.add('btn-danger');
+        } else {
+            btn.classList.remove('btn-danger');
+            btn.classList.add('btn-outline-danger');
+        }
     });
 });
 
@@ -214,5 +219,75 @@ document.addEventListener('click', function(e) {
         });
     }
 });
+
+    const yahooData = @json($yahooPricesByDate);
+    const mercariData = @json($mercariPricesByDate);
+
+    // 日付
+    const allDates = [...new Set([...yahooData.map(item => item.date), ...mercariData.map(item => item.date)])].sort();
+
+    const yahooMap = new Map(yahooData.map(item => [item.date, item.avg_price]));
+    const mercariMap = new Map(mercariData.map(item => [item.date, item.avg_price]));
+
+    const yahooPrices = allDates.map(date => yahooMap.get(date) || null);
+    const mercariPrices = allDates.map(date => mercariMap.get(date) || null);
+
+    const ctx = document.getElementById('priceChart').getContext('2d');
+    const priceChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: allDates,
+            datasets: [
+                {
+                    label: 'ヤフオク平均価格',
+                    data: yahooPrices,
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    fill: false,
+                    tension: 0.1
+                },
+            ]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'top',
+                },
+                title: {
+                    display: true,
+                    text: 'ヤフオク 平均価格推移'
+                }
+            },
+            scales: {
+                x: {
+                    title: {
+                        display: true,
+                        text: '日付'
+                    }
+                },
+                y: {
+                    title: {
+                        display: true,
+                        text: '価格 (円)'
+                    },
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+    // 平均価格を計算
+    function calcAverage(dataArray) {
+    const valid = dataArray.filter(price => typeof price === 'number');
+    const total = valid.reduce((sum, price) => sum + price, 0);
+    return valid.length > 0 ? Math.round(total / valid.length) : 0;
+    }
+
+    const yahooAvg = calcAverage(yahooPrices);
+
+    document.getElementById('yahooAverage').textContent = `ヤフオク全体平均価格: ${yahooAvg.toLocaleString()}円`;
+
 </script>
+
+    
 @endsection

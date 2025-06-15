@@ -1,0 +1,23 @@
+{
+  "name": "docker-env",
+  "version": "1.0.0",
+  "description": "",
+  "main": "yahooScrape.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tanaka-0427/MP-.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/tanaka-0427/MP-/issues"
+  },
+  "homepage": "https://github.com/tanaka-0427/MP-#readme",
+  "dependencies": {
+    "puppeteer": "^24.10.1"
+  }
+}
