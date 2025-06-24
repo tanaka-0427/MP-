@@ -2,6 +2,19 @@
 
 @section('content')
 <div class="container">
+     {{-- 成功メッセージの表示 --}}
+    @if (session('success'))
+    <div class="alert alert-success">
+        {{ session('success') }}
+    </div>
+    @endif
+    {{-- エラーメッセージの表示 --}}
+    @if (session('error'))
+    <div class="alert alert-danger">
+        {{ session('error') }}
+    </div>
+    @endif
+    
     <h1 class="mb-4">メインページ</h1>
 
     {{-- ナビゲーションボタン群 --}}

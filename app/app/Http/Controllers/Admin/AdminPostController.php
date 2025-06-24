@@ -53,4 +53,11 @@ class AdminPostController extends Controller
 
         return redirect()->route('admin.posts.show', $post->id)->with('success', '投稿を更新しました');
     }
+    public function destroy($id)
+    {
+        $post = Post::findOrFail($id);
+        $post->delete();
+
+        return redirect()->route('admin.posts.index')->with('success', '投稿を削除しました');
+    }
 }

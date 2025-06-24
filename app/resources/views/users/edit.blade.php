@@ -1,6 +1,19 @@
 @extends('layouts.app')
 
 @section('content')
+ {{-- 成功メッセージの表示 --}}
+    @if (session('success'))
+    <div class="alert alert-success">
+        {{ session('success') }}
+    </div>
+    @endif
+    {{-- エラーメッセージの表示 --}}
+    @if (session('error'))
+    <div class="alert alert-danger">
+        {{ session('error') }}
+    </div>
+    @endif
+    
 <div class="profile-edit-container">
     <h2 class="profile-edit-title">プロフィール編集</h2>
 

@@ -5,6 +5,7 @@ namespace App\Services;
 use GuzzleHttp\Client;
 use Symfony\Component\DomCrawler\Crawler;
 use App\Models\PriceHistory;
+use Illuminate\Support\Facades\Storage;
 class PriceScraperService
 {
     protected $client;
@@ -59,37 +60,45 @@ class PriceScraperService
      * @param string $keyword
      * @return array<int, array{date: string, price: int}>
      */
-    public function fetchYahooPrices(string $keyword): array
-    {
+   public function fetchYahooPrices(string $keyword, int $maxPages = 5): array
+{
+    $allPrices = [];
+    $perPage = 50;
+
+    for ($page = 1; $page <= $maxPages; $page++) {
+        $start = ($page - 1) * $perPage + 1;
+
         $url = 'https://auctions.yahoo.co.jp/closedsearch/closedsearch'
-            . '?p='     . urlencode($keyword)
+            . '?p=' . urlencode($keyword)
+            . '&va=' . urlencode($keyword)
             . '&exflg=1'
-            . '&n=50';
+            . '&n=' . $perPage
+            . '&b=' . $start;
 
         try {
             $response = $this->client->request('GET', $url);
         } catch (\Exception $e) {
-            \Log::error('Yahoo Closed request failed: ' . $e->getMessage());
-            return [];
+            \Log::error("Yahoo Closed request failed (page $page): " . $e->getMessage());
+            break;
         }
 
         if ($response->getStatusCode() !== 200) {
-            \Log::error('Yahoo Closed returned HTTP ' . $response->getStatusCode());
-            return [];
+            \Log::error("Yahoo Closed returned HTTP {$response->getStatusCode()} (page $page)");
+            break;
         }
 
-        \Log::debug('Yahoo Closed HTML snippet:', [
-            'html' => mb_substr((string)$response->getBody(), 0, 500),
-        ]);
+        $html = (string)$response->getBody();
+        $crawler = new Crawler($html);
 
-        $crawler = new Crawler((string)$response->getBody());
-        $prices  = [];
-
-        $crawler->filter('div.Product__infoCell.Product__infoCell--left')->each(function (Crawler $node) use (&$prices) {
-          
-            if (!$node->filter('span.Product__time')->count()) {
+        $prices = [];
+        $crawler->filter('li.Product')->each(function (Crawler $node) use (&$prices) {
+            if (!$node->filter('.Product__priceValue')->count() || !$node->filter('span.Product__time')->count()) {
                 return;
             }
+
+            $priceText = $node->filter('.Product__priceValue')->text();
+            $price = (int) preg_replace('/[^0-9]/', '', $priceText);
+
             $dateText = trim($node->filter('span.Product__time')->text());
             $dt = \DateTime::createFromFormat('m/d H:i', $dateText);
             if (!$dt) {
@@ -97,12 +106,6 @@ class PriceScraperService
             }
             $dt->setDate((int)date('Y'), (int)$dt->format('m'), (int)$dt->format('d'));
             $formattedDate = $dt->format('Y-m-d');
-
-            if (!$node->filter('span.FilterItem__priceValue')->count()) {
-                return;
-            }
-            $priceText = $node->filter('span.FilterItem__priceValue')->eq(0)->text();
-            $price = (int) preg_replace('/[^0-9]/', '', $priceText);
 
             if ($price > 0) {
                 $prices[] = [
@@ -112,10 +115,18 @@ class PriceScraperService
             }
         });
 
-        \Log::debug('Parsed yahooPrices:', ['count' => count($prices), 'data' => $prices]);
+        if (count($prices) === 0) {
+           
+            break;
+        }
 
-        return $prices;
+        $allPrices = array_merge($allPrices, $prices);
     }
+
+    \Log::debug('Parsed total yahooPrices:', ['count' => count($allPrices)]);
+
+    return $allPrices;
+}
      public function saveYahooPrices(int $postId, array $prices): void
     {
         foreach ($prices as $item) {
@@ -133,6 +144,31 @@ class PriceScraperService
     // ヤフオク価格取得
     $yahooPrices = $this->fetchYahooPrices($keyword);
     $this->saveYahooPrices($postId, $yahooPrices);
+    $filename = 'scraping/output_' . $keyword . '.json';
+    Storage::disk('public')->put($filename, json_encode([
+        'keyword' => $keyword,
+        'items' => $yahooPrices,
+        'average_price' => $this->calculateAverage($yahooPrices),
+        'median_price'  => $this->calculateMedian($yahooPrices),
+    ], JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT));
+    }
+    private function calculateAverage(array $items): int
+    {
+        if (empty($items)) return 0;
+        $sum = array_sum(array_column($items, 'price'));
+        return (int) round($sum / count($items));
+    }
 
-}
+    private function calculateMedian(array $items): int
+    {
+        if (empty($items)) return 0;
+        $prices = array_column($items, 'price');
+        sort($prices);
+        $count = count($prices);
+        $middle = (int) floor($count / 2);
+
+        return $count % 2
+        ? $prices[$middle]
+        : (int) round(($prices[$middle - 1] + $prices[$middle]) / 2);
+    }
 }

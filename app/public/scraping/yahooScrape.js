@@ -2,6 +2,7 @@ const puppeteer = require('puppeteer');
 const fs = require('fs');
 
 const keyword = process.argv[2] || 'ニンテンドースイッチ';
+const safeKeyword = keyword.replace(/[^\w\u3000-\u30FF\u4E00-\u9FFF]/g, '_'); 
 
 (async () => {
   const browser = await puppeteer.launch({ headless: true });
@@ -32,6 +33,15 @@ const keyword = process.argv[2] || 'ニンテンドースイッチ';
     return results;
   });
 
+  // データがない場合はエラー
+  if (items.length === 0) {
+    const html = await page.content();
+    fs.writeFileSync(`debug_${safeKeyword}.html`, html); 
+    console.error('❌ スクレイピングに失敗しました。データが0件です。');
+    await browser.close();
+    process.exit(1);
+  }
+
   // 平均・中央値の計算
   const prices = items.map(item => item.price).sort((a, b) => a - b);
   const avg = prices.reduce((a, b) => a + b, 0) / prices.length || 0;
@@ -46,8 +56,8 @@ const keyword = process.argv[2] || 'ニンテンドースイッチ';
     items
   };
 
-  // 保存（JSON形式）
-  fs.writeFileSync(`output_${keyword}.json`, JSON.stringify(result, null, 2));
+  // 保存
+  fs.writeFileSync(`output_${safeKeyword}.json`, JSON.stringify(result, null, 2));
 
   console.log(JSON.stringify(result, null, 2));
 

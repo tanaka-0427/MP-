@@ -2,6 +2,19 @@
 
 @section('content')
 <div class="container">
+     {{-- 成功メッセージの表示 --}}
+    @if (session('success'))
+    <div class="alert alert-success">
+        {{ session('success') }}
+    </div>
+    @endif
+    {{-- エラーメッセージの表示 --}}
+    @if (session('error'))
+    <div class="alert alert-danger">
+        {{ session('error') }}
+    </div>
+    @endif
+    
     <h2>投稿確認</h2>
 
     <table class="table">

@@ -247,6 +247,6 @@ class PostController extends Controller
         // 投稿を削除
         $post->delete();
 
-        return redirect()->route('main')->with('success', '投稿が削除されました。');
+        return redirect()->route('mypage')->with('success', '投稿が削除されました。');
     }
 }

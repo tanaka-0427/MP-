@@ -129,7 +129,6 @@ strong {
   margin-right: 10px;
   border-radius: 4px;
   border: none;
-  padding: 8px 18px;
   font-size: 1rem;
 }
 
@@ -280,7 +279,6 @@ form input[type="text"] {
 
 /* フォーム行のレイアウト調整 */
 form[method="POST"]:first-of-type {
-  display: flex;
   align-items: center;
 }
 
@@ -317,6 +315,32 @@ form.mt-4 button[type="submit"]:hover {
 
 .d-flex.gap-2 {
   gap: 10px;
+}
+.text-center {
+  text-align: center;
+}
+
+.btn-group-center {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 1rem;
+}
+
+.card-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  justify-content: center;
+}
+
+.btn-sm {
+  min-width: 100px;
+  font-size: 0.875rem;
+  padding: 0.375rem 0.75rem;
+  margin-right: 5px;
+  margin-bottom: 5px;
 }
 
 /*レスポンシブ（モバイル対応） */

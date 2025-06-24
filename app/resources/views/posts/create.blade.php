@@ -2,6 +2,19 @@
 
 @section('content')
 <div class="container">
+     {{-- 成功メッセージの表示 --}}
+    @if (session('success'))
+    <div class="alert alert-success">
+        {{ session('success') }}
+    </div>
+    @endif
+    {{-- エラーメッセージの表示 --}}
+    @if (session('error'))
+    <div class="alert alert-danger">
+        {{ session('error') }}
+    </div>
+    @endif
+    
     <h2>{{ isset($post->id) ? '投稿編集' : '新規投稿' }}</h2>
 
 <form action="{{ isset($post->id) ? route('posts.update', $post->id) : route('posts.store') }}" method="POST" enctype="multipart/form-data">

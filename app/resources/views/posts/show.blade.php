@@ -3,6 +3,19 @@
 @section('content')
 
 <div class="container">
+     {{-- 成功メッセージの表示 --}}
+    @if (session('success'))
+    <div class="alert alert-success">
+        {{ session('success') }}
+    </div>
+    @endif
+    {{-- エラーメッセージの表示 --}}
+    @if (session('error'))
+    <div class="alert alert-danger">
+        {{ session('error') }}
+    </div>
+    @endif
+    
     <div class="row mb-4">
         <div class="col-md-6">
             <img src="{{ asset('storage/' . $post->image) }}" class="img-fluid" alt="商品画像">
